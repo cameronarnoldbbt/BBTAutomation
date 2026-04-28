@@ -8,11 +8,12 @@
 (function () {
   'use strict';
 
-  const stateToTZ = {
+ const stateToTZ = {
     CA: { tz: "America/Los_Angeles", name: "CALIFORNIA" },
     TX: { tz: "America/Chicago", name: "TEXAS" },
     UT: { tz: "America/Denver", name: "UTAH" },
     AZ: { tz: "America/Phoenix", name: "ARIZONA" },
+    CO: { tz: "America/Denver", name: "COLORADO" },
     NV: { tz: "America/Los_Angeles", name: "NEVADA" }
   };
 
