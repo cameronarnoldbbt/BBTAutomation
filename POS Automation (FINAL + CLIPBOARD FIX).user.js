@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         POS Automation (FINAL + INVOICE FLOW FIXED)
+// @name         POS Automation
 // @match        *://edge.bigbrandtire.com/*
 // @exclude      *://edge.bigbrandtire.com/pos/invoice/*
 // @grant        none
