@@ -1,6 +1,7 @@
 // ==UserScript==
-// @name         POS Automation
+// @name         POS Automation (FINAL + INVOICE FLOW FIXED)
 // @match        *://edge.bigbrandtire.com/*
+// @exclude      *://edge.bigbrandtire.com/pos/invoice/*
 // @grant        none
 // ==/UserScript==
 
@@ -21,12 +22,15 @@
 
             const text = await navigator.clipboard.readText();
 
-            // 🔥 FIXED PARSING
-            const storeMatch = text.match(/STORE:\s*(.+)/);
-            const phoneMatch = text.match(/PHONE:\s*(.+)/);
+            // ✅ FIXED PARSING (non-greedy + safe)
+            const storeMatch = text.match(/STORE:\s*([A-Z0-9]+)/i);
+            const phoneMatch = text.match(/PHONE:\s*(\d+)/i);
 
-            const store = storeMatch ? storeMatch[1].trim() : null;
+            const storeRaw = storeMatch ? storeMatch[1].trim().toUpperCase() : null;
             const phone = phoneMatch ? phoneMatch[1].trim() : null;
+
+            // ✅ Normalize "NONE" → null
+            const store = (storeRaw === "NONE") ? null : storeRaw;
 
             console.log("RAW:", text);
             console.log("PARSED STORE:", store);
@@ -35,7 +39,7 @@
             // =========================
             // 🔥 INVOICE FLOW (NO STORE)
             // =========================
-            if (store === null && phone) {
+            if (!store && phone) {
                 console.log("No store → invoice flow");
 
                 localStorage.setItem(INVOICE_KEY, JSON.stringify({
@@ -57,7 +61,7 @@
             // =========================
             // NORMAL POS FLOW
             // =========================
-            if (store === null || !phone) {
+            if (!store || !phone) {
                 console.warn("Missing store or phone");
                 return;
             }
