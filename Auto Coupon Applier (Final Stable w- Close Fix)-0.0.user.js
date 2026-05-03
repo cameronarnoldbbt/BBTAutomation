@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Auto Coupon Applier (Final Stable w/ Close Fix)
+// @name         Auto Coupon Applier (AddSingleItem Fallback)
 // @match        *://edge.bigbrandtire.com/pos/invoice/*
 // @grant        none
 // ==/UserScript==
@@ -7,11 +7,8 @@
 (function () {
     'use strict';
 
-    console.log("Auto Coupon System Initialized");
+    console.log("Auto Coupon System Initialized (Updated)");
 
-    // =========================
-    // STATE
-    // =========================
     let couponTabLoaded = false;
     let weOpenedCouponTab = false;
 
@@ -25,6 +22,29 @@
     function hasText(text) {
         return [...document.querySelectorAll('td')]
             .some(td => td.innerText.includes(text));
+    }
+
+    function findRowByText(text) {
+        return [...document.querySelectorAll('tr')]
+            .find(r => r.innerText.includes(text));
+    }
+
+    function flipToNegative(code) {
+        const row = findRowByText(code);
+        if (!row) return;
+
+        const input = row.querySelector('input[type="number"]');
+        if (!input) return;
+
+        if (input.value === '-1') return;
+
+        input.value = -1;
+
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        input.dispatchEvent(new Event('blur', { bubbles: true }));
+
+        console.log(`[TM] Flipped ${code} to -1`);
     }
 
     function clickCoupon(code) {
@@ -42,31 +62,6 @@
         return false;
     }
 
-    async function manualAdd(code) {
-        const input = document.querySelector('#quickAddBtn');
-        if (!input) return false;
-
-        input.focus();
-        input.value = code;
-
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-
-        await sleep(150);
-
-        ['keydown','keypress','keyup'].forEach(type => {
-            input.dispatchEvent(new KeyboardEvent(type, {
-                key: 'Enter',
-                code: 'Enter',
-                keyCode: 13,
-                which: 13,
-                bubbles: true
-            }));
-        });
-
-        console.log("Manual add:", code);
-        return true;
-    }
-
     function sleep(ms) {
         return new Promise(r => setTimeout(r, ms));
     }
@@ -75,22 +70,16 @@
         return document.querySelectorAll('button.btn-success').length > 0;
     }
 
-    // 🔥 NEW: Close only visible modal (with delay safety)
     async function closeCouponModal() {
-        await sleep(300); // allow UI to settle
+        await sleep(300);
 
         const modal = document.querySelector('.modal.in, .modal.show');
-        if (!modal) {
-            console.warn("No visible modal found");
-            return;
-        }
+        if (!modal) return;
 
         const btn = modal.querySelector('button[data-dismiss="modal"]');
         if (btn) {
             btn.click();
             console.log("Closed coupon modal");
-        } else {
-            console.warn("Close button not found in modal");
         }
     }
 
@@ -105,10 +94,7 @@
         const tab = [...document.querySelectorAll('a, button')]
             .find(el => el.innerText.toLowerCase().includes('coupon'));
 
-        if (!tab) {
-            console.warn("Coupon tab not found");
-            return;
-        }
+        if (!tab) return;
 
         tab.click();
         weOpenedCouponTab = true;
@@ -121,12 +107,10 @@
                 return;
             }
         }
-
-        console.warn("Coupon tab failed to load");
     }
 
     // =========================
-    // CORE LOGIC
+    // MAIN LOGIC
     // =========================
     async function run() {
 
@@ -148,7 +132,14 @@
 
             if (!success) {
                 if (weOpenedCouponTab) await closeCouponModal();
-                await manualAdd('4HG7KL9');
+
+                console.log("[TM] Fallback → addSingleItem (Oil)");
+
+                if (typeof addSingleItem === 'function') {
+                    addSingleItem(101002); // adjust if needed
+                    await sleep(400);
+                    flipToNegative('4HG7KL9');
+                }
             }
 
             return;
@@ -166,7 +157,14 @@
 
             if (!success) {
                 if (weOpenedCouponTab) await closeCouponModal();
-                await manualAdd('MZ435AL');
+
+                console.log("[TM] Fallback → addSingleItem (Alignment)");
+
+                if (typeof addSingleItem === 'function') {
+                    addSingleItem(101004);
+                    await sleep(400);
+                    flipToNegative('MZ435AL');
+                }
             }
 
             return;
@@ -185,7 +183,6 @@
         subtree: true
     });
 
-    // Initial run
     setTimeout(run, 1000);
 
 })();
