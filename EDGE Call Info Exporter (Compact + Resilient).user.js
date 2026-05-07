@@ -1,5 +1,6 @@
 // ==UserScript==
 // @name EDGE Call Info Exporter (Compact + Resilient)
+// @version      2.0
 // @match *://edge.bigbrandtire.com/*
 // ==/UserScript==
 
