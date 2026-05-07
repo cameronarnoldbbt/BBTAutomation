@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Expand Tires
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      2.0
 // @match        https://edge.bigbrandtire.com/POS/Tire/*
 // @grant        none
 // @run-at       document-idle
