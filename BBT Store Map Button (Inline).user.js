@@ -1,5 +1,6 @@
 // ==UserScript==
 // @name         BBT Store Map Button 
+// @version      2.0
 // @match        *://edge.bigbrandtire.com/*
 // @grant        none
 // @run-at       document-idle
