@@ -1,6 +1,7 @@
 // ==UserScript==
 // @name         Store Time Banner
 // @match        *://edge.bigbrandtire.com/*
+// @version      2.0
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
