@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Edge Reset Hotkey
 // @version      2.0
-// @updateURL    https://githubusercontent.com
-// @downloadURL  https://githubusercontent.com
+// @updateURL    https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Edge%20Reset%20Hotkey.user.js
+// @downloadURL  https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Edge%20Reset%20Hotkey.user.js
 // @match        *://edge.bigbrandtire.com/*
 // @grant        none
 // ==/UserScript==
