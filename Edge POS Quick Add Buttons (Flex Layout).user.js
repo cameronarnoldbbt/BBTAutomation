@@ -2,8 +2,8 @@
 // @name         Edge POS Quick Add Buttons (2-Row Layout)
 // @namespace    http://tampermonkey.net/
 // @version      4.0
-// @updateURL    https://githubusercontent.com
-// @downloadURL  https://githubusercontent.com
+// @updateURL    https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Edge%20POS%20Quick%20Add%20Buttons%20(Flex%20Layout).user.js
+// @downloadURL  https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Edge%20POS%20Quick%20Add%20Buttons%20(Flex%20Layout).user.js
 // @description  Adds quick action buttons for common services (2 rows)
 // @match        https://edge.bigbrandtire.com/pos/invoice/*
 // @grant        none
