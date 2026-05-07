@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         BBT Store Map Button (Inline)
+// @name         BBT Store Map Button 
 // @match        *://edge.bigbrandtire.com/*
 // @grant        none
 // @run-at       document-idle
@@ -1370,17 +1370,23 @@
   }
 }
 
+
+  let currentStore = null;
+
   function getStoreNumber() {
     const el = document.getElementById('storeNumber');
     return el ? el.textContent.trim() : null;
   }
 
- function createMap(lat, lng) {
-  let container = document.getElementById('store-map-container');
+  function buildMapSrc(lat, lng) {
+    return `https://www.google.com/maps/d/u/0/embed?mid=${MAP_ID}&ll=${lat}%2C${lng}&z=18`;
+  }
 
-  const src = `https://www.google.com/maps/d/u/0/embed?mid=${MAP_ID}&ll=${lat}%2C${lng}&z=18`;
+  function ensureMapContainer() {
+    let container = document.getElementById('store-map-container');
 
-  if (!container) {
+    if (container) return container;
+
     container = document.createElement('div');
     container.id = 'store-map-container';
 
@@ -1395,10 +1401,10 @@
       border: "1px solid #ccc",
       borderRadius: "8px",
       overflow: "hidden",
-      boxShadow: "0 4px 12px rgba(0,0,0,0.2)"
+      boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+      display: "none" // 👈 start hidden
     });
 
-    // ❌ Close button
     const closeBtn = document.createElement('div');
     closeBtn.innerText = "✕";
 
@@ -1416,10 +1422,9 @@
     });
 
     closeBtn.onclick = () => {
-      container.remove();
+      container.style.display = "none"; // 👈 hide instead of destroy
     };
 
-    // iframe
     const iframe = document.createElement('iframe');
     iframe.id = 'store-map';
     iframe.width = "100%";
@@ -1429,55 +1434,67 @@
     container.appendChild(closeBtn);
     container.appendChild(iframe);
     document.body.appendChild(container);
+
+    return container;
   }
 
-  // update map
-  const iframe = container.querySelector('iframe');
-  iframe.src = src;
-}
+  function preloadMap(storeNumber) {
+    if (!storeNumber || storeNumber === currentStore) return;
+
+    const loc = storeMap[storeNumber];
+    if (!loc) return;
+
+    const container = ensureMapContainer();
+    const iframe = container.querySelector('iframe');
+
+    const newSrc = buildMapSrc(loc.lat, loc.lng);
+
+    if (iframe.src !== newSrc) {
+      iframe.src = newSrc; // 👈 preload happens here
+      currentStore = storeNumber;
+      console.log("Preloading map for store:", storeNumber);
+    }
+  }
+
+  function showMap() {
+    const container = ensureMapContainer();
+    container.style.display = "block"; // 👈 instant show
+  }
 
   function handleClick() {
     const storeNumber = getStoreNumber();
-
-    if (!storeNumber) {
-      console.log("No store number found");
-      return;
-    }
-
-    const loc = storeMap[storeNumber];
-
-    if (!loc) {
-      console.log("Store not found:", storeNumber);
-      return;
-    }
-
-    createMap(loc.lat, loc.lng);
+    preloadMap(storeNumber); // safety (in case not preloaded yet)
+    showMap();
   }
 
   function injectButton() {
     const storeBtn = document.getElementById('storeNumber');
     if (!storeBtn) return;
 
-    // prevent duplicate
     if (document.getElementById('map-btn')) return;
 
     const mapBtn = document.createElement('button');
     mapBtn.id = "map-btn";
     mapBtn.innerText = "Map";
 
-    mapBtn.className = "nav-btn-font nav-btn"; // matches your UI
+    mapBtn.className = "nav-btn-font nav-btn";
     mapBtn.style.marginLeft = "8px";
 
     mapBtn.onclick = handleClick;
 
-    // insert right after store button
     storeBtn.insertAdjacentElement('afterend', mapBtn);
 
-    console.log("Map button injected next to store number");
+    console.log("Map button injected");
+  }
+
+  function watchStoreChanges() {
+    setInterval(() => {
+      const storeNumber = getStoreNumber();
+      preloadMap(storeNumber); // 👈 background update whenever store changes
+    }, 1000);
   }
 
   function init() {
-    // retry because your UI loads dynamically
     const interval = setInterval(() => {
       injectButton();
 
@@ -1485,6 +1502,9 @@
         clearInterval(interval);
       }
     }, 1000);
+
+    ensureMapContainer(); // 👈 build immediately
+    watchStoreChanges();  // 👈 keep it fresh
   }
 
   init();
