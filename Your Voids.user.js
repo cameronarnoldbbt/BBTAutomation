@@ -1,15 +1,9 @@
 // ==UserScript==
-// @name         Your Voids
+// @name         Your Voids WORKING
 // @match        https://edge.bigbrandtire.com/pos/*
 // @version      1.0
 // @updateURL    https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Your%20Voids.user.js
 // @downloadURL  https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Your%20Voids.user.js
-// @grant        none
-// ==/UserScript==
-
-// ==UserScript==
-// @name         Your Voids (With Clear Button)
-// @match        https://edge.bigbrandtire.com/pos/*
 // @grant        none
 // ==/UserScript==
 
