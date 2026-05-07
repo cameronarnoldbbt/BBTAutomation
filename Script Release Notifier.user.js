@@ -1,84 +1,164 @@
 // ==UserScript==
-// @name         Script Release Notifier
+// @name         BBT Script Release Notifier
 // @match        https://edge.bigbrandtire.com/pos/*
-// @version      1.0
-// @updateURL    https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Script%20Release%20Notifier.user.js
-// @downloadURL  https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Script%20Release%20Notifier.user.js
 // @grant        GM_xmlhttpRequest
 // @connect      api.github.com
+// @connect      raw.githubusercontent.com
 // ==/UserScript==
 
 (function () {
     'use strict';
 
+    // ===== CONFIG =====
     const OWNER = 'cameronarnoldbbt';
     const REPO = 'BBTAutomation';
     const BRANCH = 'main';
-    const PATH = ''; // root (leave empty unless you move scripts into a folder)
+    const PATH = '';
 
     const API_URL = `https://api.github.com/repos/${OWNER}/${REPO}/contents${PATH ? '/' + PATH : ''}?ref=${BRANCH}`;
+    const REPO_URL = `https://github.com/${OWNER}/${REPO}`;
 
     const TODAY = new Date().toDateString();
-    const LAST_CHECK = localStorage.getItem('scriptCheckDate');
+    const LAST_CHECK = localStorage.getItem('bbtScriptCheckDate');
 
-    if (LAST_CHECK === TODAY) {
-        return; // already checked today
+    // ===== SHOW MODAL IF PENDING =====
+    const pendingData = JSON.parse(localStorage.getItem('bbtPendingScripts') || 'null');
+    if (pendingData) {
+        window.addEventListener('load', () => {
+            showScriptModal(pendingData);
+        });
     }
+
+    // ===== DAILY CHECK =====
+    if (LAST_CHECK === TODAY) return;
 
     GM_xmlhttpRequest({
         method: 'GET',
         url: API_URL,
-        headers: {
-            'Accept': 'application/vnd.github.v3+json'
-        },
-        onload: function (response) {
+        headers: { 'Accept': 'application/vnd.github.v3+json' },
+        onload: async function (response) {
             try {
                 const data = JSON.parse(response.responseText);
 
-                // only grab JS files (optional filter)
-                const currentFiles = data
-                    .filter(file => file.type === 'file' && file.name.endsWith('.js'))
-                    .map(file => file.name);
+                const jsFiles = data.filter(f => f.type === 'file' && f.name.endsWith('.js'));
+                const currentFiles = jsFiles.map(f => f.name);
 
-                const storedFiles = JSON.parse(localStorage.getItem('knownScripts') || '[]');
+                const storedFiles = JSON.parse(localStorage.getItem('bbtKnownScripts') || '[]');
+                const newFiles = jsFiles.filter(f => !storedFiles.includes(f.name));
 
-                // find NEW files (not previously seen)
-                const newScripts = currentFiles.filter(file => !storedFiles.includes(file));
+                if (newFiles.length > 0) {
+                    // fetch description for FIRST new script only (keeps it fast)
+                    const file = newFiles[0];
+                    const description = await fetchDescription(file.download_url);
 
-                if (newScripts.length > 0) {
-                    showPopup(newScripts.length);
+                    const payload = {
+                        name: file.name,
+                        description: description || 'No description provided.'
+                    };
+
+                    localStorage.setItem('bbtPendingScripts', JSON.stringify(payload));
                 }
 
-                // update storage
-                localStorage.setItem('knownScripts', JSON.stringify(currentFiles));
-                localStorage.setItem('scriptCheckDate', TODAY);
+                localStorage.setItem('bbtKnownScripts', JSON.stringify(currentFiles));
+                localStorage.setItem('bbtScriptCheckDate', TODAY);
 
-            } catch (e) {
-                console.error('Script check failed:', e);
+            } catch (err) {
+                console.error('BBT script check failed:', err);
             }
         }
     });
 
-    function showPopup(count) {
-        const popup = document.createElement('div');
-        popup.innerText = `⚡ ${count} new script${count > 1 ? 's' : ''} available!`;
+    // ===== FETCH DESCRIPTION FROM RAW FILE =====
+    function fetchDescription(url) {
+        return new Promise((resolve) => {
+            GM_xmlhttpRequest({
+                method: 'GET',
+                url: url,
+                onload: function (res) {
+                    try {
+                        const text = res.responseText;
 
-        Object.assign(popup.style, {
+                        // matches: // @description something here
+                        const match = text.match(/@description\s+(.+)/i);
+
+                        resolve(match ? match[1].trim() : null);
+                    } catch {
+                        resolve(null);
+                    }
+                },
+                onerror: () => resolve(null)
+            });
+        });
+    }
+
+    // ===== MODAL =====
+    function showScriptModal(data) {
+        const overlay = document.createElement('div');
+        const modal = document.createElement('div');
+
+        Object.assign(overlay.style, {
             position: 'fixed',
-            top: '20px',
-            right: '20px',
-            background: '#222',
-            color: '#fff',
-            padding: '12px 16px',
-            borderRadius: '8px',
-            zIndex: 9999,
-            fontSize: '14px',
-            boxShadow: '0 0 10px rgba(0,0,0,0.3)'
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: 'rgba(0,0,0,0.5)',
+            zIndex: 9998
         });
 
-        document.body.appendChild(popup);
+        modal.innerHTML = `
+            <div style="font-size:18px; font-weight:bold; text-decoration: underline; margin-bottom:12px;">
+                EDGE Automations
+            </div>
 
-        setTimeout(() => popup.remove(), 8000);
+            <div style="font-size:16px; margin-bottom:10px;">
+                New Script Available!
+            </div>
+
+            <div style="font-size:15px; margin-bottom:10px;">
+                ${data.name}
+            </div>
+
+            <div style="font-size:13px; opacity:0.85; margin-bottom:20px;">
+                ${data.description}
+            </div>
+
+            <div style="display:flex; justify-content: space-between;">
+                <button id="bbtDismiss">Dismiss</button>
+                <button id="bbtOpenGitHub">Open GitHub</button>
+            </div>
+        `;
+
+        Object.assign(modal.style, {
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: '#1e1e1e',
+            color: '#fff',
+            padding: '20px',
+            borderRadius: '12px',
+            zIndex: 9999,
+            width: '320px',
+            boxShadow: '0 0 20px rgba(0,0,0,0.4)',
+            fontFamily: 'sans-serif'
+        });
+
+        document.body.appendChild(overlay);
+        document.body.appendChild(modal);
+
+        document.getElementById('bbtDismiss').onclick = () => {
+            localStorage.removeItem('bbtPendingScripts');
+            overlay.remove();
+            modal.remove();
+        };
+
+        document.getElementById('bbtOpenGitHub').onclick = () => {
+            window.open(REPO_URL, '_blank');
+            localStorage.removeItem('bbtPendingScripts');
+            overlay.remove();
+            modal.remove();
+        };
     }
 
 })();
