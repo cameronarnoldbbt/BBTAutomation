@@ -7,11 +7,35 @@
 // @grant        none
 // ==/UserScript==
 
+// ==UserScript==
+// @name         Your Voids (With Clear Button)
+// @match        https://edge.bigbrandtire.com/pos/*
+// @grant        none
+// ==/UserScript==
+
 (function () {
     'use strict';
 
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRMetfRl9lkfY9Fu4bJnAopzPqMhl0QyvFkXjWfeLx8O0op2hPQfUsHo9WfnPp53qdvM2clATouCMhw/pub?output=csv';
 
+    // ===== STORAGE =====
+    function getCleared() {
+        return JSON.parse(localStorage.getItem('bbtClearedVoids') || '[]');
+    }
+
+    function saveCleared(list) {
+        localStorage.setItem('bbtClearedVoids', JSON.stringify(list));
+    }
+
+    function markCleared(estimate) {
+        const cleared = getCleared();
+        if (!cleared.includes(estimate)) {
+            cleared.push(estimate);
+            saveCleared(cleared);
+        }
+    }
+
+    // ===== USER =====
     function getUserCode() {
         let code = localStorage.getItem('bbtUserCode');
 
@@ -37,50 +61,62 @@
     }
 
     function filterRows(rows, userCode) {
+        const cleared = getCleared();
+
         return rows.slice(1).filter(row => {
-            return (row[0] || '').toUpperCase().includes(`(${userCode})`);
+            const agentMatch = (row[0] || '').toUpperCase().includes(`(${userCode})`);
+            const notCleared = !cleared.includes(row[2]); // estimate
+
+            return agentMatch && notCleared;
         });
     }
 
     function buildRow(row) {
-        const customer = row[0];     // Agent
-        const store = row[1];        // StoreNumber
-        const estimate = row[2];     // Estimate
-        const phone = row[3];        // CustomerPhoneNumber
-        const created = row[4];      // Date Created
-        const total = row[8];        // Estimate Total
+        const customer = row[0];
+        const store = row[1];
+        const estimate = row[2];
+        const phone = row[3];
+        const created = row[4];
+        const total = row[8];
 
         return `
-        <div class="invoiceDetailRows row label-invoice-warning">
+        <div class="invoiceDetailRows row label-invoice-warning" data-estimate="${estimate}">
             <div class="col-lg-1 invoiceBorderRight centerVertical">${estimate}</div>
-
             <div class="col-lg-2 invoiceBorderRight">${customer}</div>
-
             <div class="col-lg-1 invoiceBorderRight">$${total}</div>
-
-            <!-- Created (FIXED) -->
             <div class="col-lg-1 invoiceBorderRight">${created}</div>
-
-            <!-- Phone -->
             <div class="col-lg-2 invoiceBorderRight">${phone}</div>
-
-            <!-- Store -->
             <div class="col-lg-2 invoiceBorderRight">${store}</div>
-
-            <div class="col-lg-2 invoiceBorderRight">-</div>
-
-            <div class="col-lg-1">${localStorage.getItem('bbtUserCode')}</div>
+            <div class="col-lg-1">
+                <button class="clearBtn" style="background:#28a745;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">
+                    ✓
+                </button>
+            </div>
         </div>
         `;
     }
 
+    function attachClearHandlers() {
+        document.querySelectorAll('.clearBtn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const rowEl = e.target.closest('.invoiceDetailRows');
+                const estimate = rowEl.getAttribute('data-estimate');
+
+                markCleared(estimate);
+
+                // remove from UI instantly
+                rowEl.remove();
+
+                // update badge
+                const remaining = document.querySelectorAll('.invoiceDetailRows').length;
+                updateBadge(remaining);
+            });
+        });
+    }
+
     async function loadCustomData() {
         const container = document.querySelector('.indexv2Container');
-
-        if (!container) {
-            console.warn('❌ Could not find indexv2Container');
-            return;
-        }
+        if (!container) return;
 
         const userCode = getUserCode();
         const rows = await fetchCSV();
@@ -95,10 +131,11 @@
 
         container.innerHTML = filtered.map(buildRow).join('');
 
+        attachClearHandlers();
         updateBadge(filtered.length);
     }
 
-  function updateHeaders() {
+function updateHeaders() {
     const headers = document.querySelectorAll('.invoiceResultHeaders');
 
     headers.forEach(header => {
@@ -106,22 +143,25 @@
 
         // Appt Time → Phone
         if (text.startsWith('Appt')) {
-            header.innerHTML = 'Phone&nbsp;&nbsp;&nbsp;<i class="fa"></i>';
+            header.innerHTML = 'Phone&nbsp;&nbsp;&nbsp;';
         }
 
-        // Prom Time Last Touched → Store (FULL REPLACE)
+        // Prom Time → Store
         if (text.includes('Prom')) {
-            header.innerHTML = 'Store&nbsp;&nbsp;&nbsp;<i class="fa"></i>';
+            header.innerHTML = 'Store&nbsp;&nbsp;&nbsp;';
+        }
+
+        // Vehicle → Clear
+        if (text.startsWith('Vehicle')) {
+            header.innerHTML = 'Clear&nbsp;&nbsp;&nbsp;';
         }
     });
 
-    console.log('✅ Headers fully updated');
+    console.log('✅ Headers updated (Phone / Store / Clear)');
 }
-
     function setActive(tab) {
         document.querySelectorAll('#ticketTypeSelector li')
             .forEach(el => el.classList.remove('active'));
-
         tab.classList.add('active');
     }
 
