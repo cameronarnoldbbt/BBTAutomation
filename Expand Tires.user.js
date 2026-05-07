@@ -2,8 +2,8 @@
 // @name         Expand Tires
 // @namespace    http://tampermonkey.net/
 // @version      2.0
-// @updateURL    https://githubusercontent.com
-// @downloadURL  https://githubusercontent.com
+// @updateURL    https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Expand%20Tires.user.js
+// @downloadURL  https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Expand%20Tires.user.js
 // @match        https://edge.bigbrandtire.com/POS/Tire/*
 // @grant        none
 // @run-at       document-idle
