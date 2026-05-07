@@ -3,8 +3,8 @@
 // @match        *://edge.bigbrandtire.com/*
 // @version      2.0
 // @grant        none
-// @updateURL    https://githubusercontent.com
-// @downloadURL  https://githubusercontent.com
+// @updateURL    https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Store%20Time%20Banner-0.0.user.js
+// @downloadURL  https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Store%20Time%20Banner-0.0.user.js
 // @run-at       document-idle
 // ==/UserScript==
 
