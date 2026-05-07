@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Check Boxes + Radio
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      2.0
 // @description  Auto-select checkboxes and radio if not already selected
 // @match        *://edge.bigbrandtire.com/pos/invoice/*
 // @grant        none
