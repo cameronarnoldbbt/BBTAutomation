@@ -2,6 +2,8 @@
 // @name         POS Automation
 // @match        *://edge.bigbrandtire.com/*
 // @version      2.0
+// @updateURL    https://githubusercontent.com
+// @downloadURL  https://githubusercontent.com
 // @exclude      *://edge.bigbrandtire.com/pos/invoice/*
 // @grant        none
 // ==/UserScript==
