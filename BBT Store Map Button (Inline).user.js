@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         BBT Store Map Button 
 // @version      2.0
-// @updateURL    https://githubusercontent.com
-// @downloadURL  https://githubusercontent.com
+// @updateURL    https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/BBT%20Store%20Map%20Button%20(Inline).user.js
+// @downloadURL  https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/BBT%20Store%20Map%20Button%20(Inline).user.js
 // @match        *://edge.bigbrandtire.com/*
 // @grant        none
 // @run-at       document-idle
