@@ -2,6 +2,8 @@
 // @name         Edge POS Quick Add Buttons (2-Row Layout)
 // @namespace    http://tampermonkey.net/
 // @version      4.0
+// @updateURL    https://githubusercontent.com
+// @downloadURL  https://githubusercontent.com
 // @description  Adds quick action buttons for common services (2 rows)
 // @match        https://edge.bigbrandtire.com/pos/invoice/*
 // @grant        none
