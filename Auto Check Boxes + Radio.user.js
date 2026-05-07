@@ -2,6 +2,8 @@
 // @name         Auto Check Boxes + Radio
 // @namespace    http://tampermonkey.net/
 // @version      2.0
+// @updateURL    https://githubusercontent.com
+// @downloadURL  https://githubusercontent.com
 // @description  Auto-select checkboxes and radio if not already selected
 // @match        *://edge.bigbrandtire.com/pos/invoice/*
 // @grant        none
