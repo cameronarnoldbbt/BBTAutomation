@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Auto Coupon Applier (AddSingleItem Fallback)
 // @version      2.0
-// @updateURL    https://githubusercontent.com
-// @downloadURL  https://githubusercontent.com
+// @updateURL    https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Auto%20Coupon%20Applier%20(Final%20Stable%20w-%20Close%20Fix)-0.0.user.js
+// @downloadURL  https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Auto%20Coupon%20Applier%20(Final%20Stable%20w-%20Close%20Fix)-0.0.user.js
 // @match        *://edge.bigbrandtire.com/pos/invoice/*
 // @grant        none
 // ==/UserScript==
