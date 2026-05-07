@@ -1,6 +1,7 @@
 // ==UserScript==
 // @name         POS Automation
 // @match        *://edge.bigbrandtire.com/*
+// @version      2.0
 // @exclude      *://edge.bigbrandtire.com/pos/invoice/*
 // @grant        none
 // ==/UserScript==
