@@ -3,6 +3,8 @@
 // @match        *://edge.bigbrandtire.com/*
 // @version      2.0
 // @grant        none
+// @updateURL    https://githubusercontent.com
+// @downloadURL  https://githubusercontent.com
 // @run-at       document-idle
 // ==/UserScript==
 
