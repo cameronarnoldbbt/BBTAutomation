@@ -2,6 +2,10 @@
 // @name         BBT Script Release Notifier
 // @match        https://edge.bigbrandtire.com/pos/*
 // @grant        GM_xmlhttpRequest
+// @match        *://edge.bigbrandtire.com/*
+// @version      1.0
+// @updateURL    https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Script%20Release%20Notifier.user.js
+// @downloadURL  https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Script%20Release%20Notifier.user.js
 // @connect      api.github.com
 // @connect      raw.githubusercontent.com
 // ==/UserScript==
