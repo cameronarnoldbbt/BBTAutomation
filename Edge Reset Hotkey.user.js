@@ -1,5 +1,6 @@
 // ==UserScript==
 // @name         Edge Reset Hotkey
+// @version      2.0
 // @match        *://edge.bigbrandtire.com/*
 // @grant        none
 // ==/UserScript==
