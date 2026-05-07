@@ -1,5 +1,6 @@
 // ==UserScript==
-// @name         BBT Store Map Button (Inline)
+// @name         BBT Store Map Button + C
+// @version      2.1
 // @match        *://edge.bigbrandtire.com/*
 // @grant        none
 // @run-at       document-idle
@@ -10,7 +11,7 @@
 
   const MAP_ID = "1zkxsi137S5TnHyPHmNaPLdz6_hDNjs4";
 
-  // 🔥 Paste your full storeMap here
+  // 🔥 shortened for readability
   let storeMap ={
   "1001": {
     "lat": 34.4267895,
@@ -1370,17 +1371,22 @@
   }
 }
 
+  let currentStore = null;
+
   function getStoreNumber() {
     const el = document.getElementById('storeNumber');
     return el ? el.textContent.trim() : null;
   }
 
- function createMap(lat, lng) {
-  let container = document.getElementById('store-map-container');
+  function buildMapSrc(lat, lng) {
+    return `https://www.google.com/maps/d/u/0/embed?mid=${MAP_ID}&ll=${lat}%2C${lng}&z=18`;
+  }
 
-  const src = `https://www.google.com/maps/d/u/0/embed?mid=${MAP_ID}&ll=${lat}%2C${lng}&z=18`;
+  // ===== MAP CONTAINER =====
+  function ensureMapContainer() {
+    let container = document.getElementById('store-map-container');
+    if (container) return container;
 
-  if (!container) {
     container = document.createElement('div');
     container.id = 'store-map-container';
 
@@ -1395,10 +1401,10 @@
       border: "1px solid #ccc",
       borderRadius: "8px",
       overflow: "hidden",
-      boxShadow: "0 4px 12px rgba(0,0,0,0.2)"
+      boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+      display: "none"
     });
 
-    // ❌ Close button
     const closeBtn = document.createElement('div');
     closeBtn.innerText = "✕";
 
@@ -1415,13 +1421,9 @@
       padding: "2px 6px"
     });
 
-    closeBtn.onclick = () => {
-      container.remove();
-    };
+    closeBtn.onclick = () => container.style.display = "none";
 
-    // iframe
     const iframe = document.createElement('iframe');
-    iframe.id = 'store-map';
     iframe.width = "100%";
     iframe.height = "100%";
     iframe.style.border = "0";
@@ -1429,62 +1431,136 @@
     container.appendChild(closeBtn);
     container.appendChild(iframe);
     document.body.appendChild(container);
+
+    return container;
   }
 
-  // update map
-  const iframe = container.querySelector('iframe');
-  iframe.src = src;
-}
+  function preloadMap(storeNumber) {
+    if (!storeNumber || storeNumber === currentStore) return;
+
+    const loc = storeMap[storeNumber];
+    if (!loc) return;
+
+    const container = ensureMapContainer();
+    const iframe = container.querySelector('iframe');
+
+    const newSrc = buildMapSrc(loc.lat, loc.lng);
+
+    if (iframe.src !== newSrc) {
+      iframe.src = newSrc;
+      currentStore = storeNumber;
+    }
+  }
+
+  function showMap() {
+    ensureMapContainer().style.display = "block";
+  }
 
   function handleClick() {
     const storeNumber = getStoreNumber();
-
-    if (!storeNumber) {
-      console.log("No store number found");
-      return;
-    }
-
-    const loc = storeMap[storeNumber];
-
-    if (!loc) {
-      console.log("Store not found:", storeNumber);
-      return;
-    }
-
-    createMap(loc.lat, loc.lng);
+    preloadMap(storeNumber);
+    showMap();
   }
 
+  // ===== 🐛 CATERPILLAR CONTAINER =====
+  function ensureCaterpillarContainer() {
+    let container = document.getElementById('caterpillar-container');
+    if (container) return container;
+
+    container = document.createElement('div');
+    container.id = 'caterpillar-container';
+
+    Object.assign(container.style, {
+      position: "fixed",
+      bottom: "20px",
+      right: "380px",
+      width: "300px",
+      height: "300px",
+      zIndex: "999999",
+      background: "white",
+      border: "1px solid #ccc",
+      borderRadius: "8px",
+      overflow: "hidden",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+      display: "none"
+    });
+
+    const closeBtn = document.createElement('div');
+    closeBtn.innerText = "✕";
+
+    Object.assign(closeBtn.style, {
+      position: "absolute",
+      top: "5px",
+      right: "8px",
+      cursor: "pointer",
+      fontSize: "16px",
+      fontWeight: "bold",
+      background: "rgba(255,255,255,0.8)",
+      borderRadius: "50%",
+      padding: "2px 6px"
+    });
+
+    closeBtn.onclick = () => container.style.display = "none";
+
+    const img = document.createElement('img');
+    img.src = "https://preview.redd.it/caterpillar-smoking-a-cigarette-v0-ki2tlww8buw71.jpg?width=1080&crop=smart&auto=webp&s=4592a05b83188769818f80a5929daf4c5576b4c1";
+    img.style.width = "100%";
+    img.style.height = "100%";
+    img.style.objectFit = "cover";
+
+    container.appendChild(closeBtn);
+    container.appendChild(img);
+    document.body.appendChild(container);
+
+    return container;
+  }
+
+  function toggleCaterpillar() {
+    const container = ensureCaterpillarContainer();
+    container.style.display =
+      container.style.display === "none" ? "block" : "none";
+  }
+
+  // ===== BUTTON INJECTION =====
   function injectButton() {
     const storeBtn = document.getElementById('storeNumber');
     if (!storeBtn) return;
 
-    // prevent duplicate
     if (document.getElementById('map-btn')) return;
 
     const mapBtn = document.createElement('button');
     mapBtn.id = "map-btn";
     mapBtn.innerText = "Map";
-
-    mapBtn.className = "nav-btn-font nav-btn"; // matches your UI
+    mapBtn.className = "nav-btn-font nav-btn";
     mapBtn.style.marginLeft = "8px";
-
     mapBtn.onclick = handleClick;
 
-    // insert right after store button
-    storeBtn.insertAdjacentElement('afterend', mapBtn);
+    const catBtn = document.createElement('button');
+    catBtn.id = "caterpillar-btn";
+    catBtn.innerText = "🐛";
+    catBtn.className = "nav-btn-font nav-btn";
+    catBtn.style.marginLeft = "6px";
+    catBtn.onclick = toggleCaterpillar;
 
-    console.log("Map button injected next to store number");
+    storeBtn.insertAdjacentElement('afterend', mapBtn);
+    mapBtn.insertAdjacentElement('afterend', catBtn);
+  }
+
+  function watchStoreChanges() {
+    setInterval(() => {
+      preloadMap(getStoreNumber());
+    }, 1000);
   }
 
   function init() {
-    // retry because your UI loads dynamically
     const interval = setInterval(() => {
       injectButton();
-
-      if (document.getElementById('map-btn')) {
-        clearInterval(interval);
-      }
+      if (document.getElementById('map-btn')) clearInterval(interval);
     }, 1000);
+
+    ensureMapContainer();
+    ensureCaterpillarContainer();
+    watchStoreChanges();
   }
 
   init();
