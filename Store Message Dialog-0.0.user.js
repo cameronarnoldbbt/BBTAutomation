@@ -26,17 +26,23 @@
         return text.split('\n').map(r => r.split(','));
     }
 
-    function findMessage(rows, storeNumber) {
-        for (let row of rows) {
-            const store = row[1]?.trim();
-            const message = row[2]?.trim();
+ function findMessage(rows, storeNumber) {
+    const MAX_ROW = 31; // 👈 stops before row 32 (0-index handled below)
 
-            if (store === storeNumber && message) {
-                return message;
-            }
+    for (let i = 0; i < rows.length; i++) {
+        if (i >= MAX_ROW) break; // 👈 ignore B32+
+
+        const row = rows[i];
+
+        const store = row[1]?.trim();
+        const message = row[2]?.trim();
+
+        if (store === storeNumber && message) {
+            return message;
         }
-        return null;
     }
+    return null;
+}
 
     // ✅ Preload
     function preloadMessage() {
