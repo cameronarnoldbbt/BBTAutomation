@@ -2,6 +2,8 @@
 // @name         Your Voids
 // @match        https://edge.bigbrandtire.com/pos/*
 // @version      1.0
+// @updateURL    https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Your%20Voids.user.js
+// @downloadURL  https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Your%20Voids.user.js
 // @grant        none
 // ==/UserScript==
 
