@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Store Distance Overlay
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      2.0
 // @description  Show distance between stores in tire screen
 // @match        https://edge.bigbrandtire.com/POS/Tire/*
 // @grant        none
