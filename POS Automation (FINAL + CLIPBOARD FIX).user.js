@@ -2,8 +2,8 @@
 // @name         POS Automation
 // @match        *://edge.bigbrandtire.com/*
 // @version      2.0
-// @updateURL    https://githubusercontent.com
-// @downloadURL  https://githubusercontent.com
+// @updateURL    https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/POS%20Automation%20(FINAL%20+%20CLIPBOARD%20FIX).user.js
+// @downloadURL  https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/POS%20Automation%20(FINAL%20+%20CLIPBOARD%20FIX).user.js
 // @exclude      *://edge.bigbrandtire.com/pos/invoice/*
 // @grant        none
 // ==/UserScript==
