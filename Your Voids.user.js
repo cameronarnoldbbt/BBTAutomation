@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Your Voids WORKING
-// @match        https://edge.bigbrandtire.com/pos/*
+// @match        *://edge.bigbrandtire.com/*
 // @version      1.0
 // @updateURL    https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Your%20Voids.user.js
 // @downloadURL  https://github.com/cameronarnoldbbt/BBTAutomation/raw/refs/heads/main/Your%20Voids.user.js
@@ -11,6 +11,7 @@
     'use strict';
 
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRMetfRl9lkfY9Fu4bJnAopzPqMhl0QyvFkXjWfeLx8O0op2hPQfUsHo9WfnPp53qdvM2clATouCMhw/pub?output=csv';
+    const INVOICE_KEY = 'invoice_reprint_flow';
 
     // ===== STORAGE =====
     function getCleared() {
@@ -29,10 +30,8 @@
         }
     }
 
-    // ===== USER =====
     function getUserCode() {
         let code = localStorage.getItem('bbtUserCode');
-
         if (!code) {
             code = prompt('Enter your employee code (example: CA978)');
             if (code) {
@@ -40,7 +39,6 @@
                 localStorage.setItem('bbtUserCode', code);
             }
         }
-
         return code;
     }
 
@@ -58,10 +56,10 @@
         const cleared = getCleared();
 
         return rows.slice(1).filter(row => {
-            const agentMatch = (row[0] || '').toUpperCase().includes(`(${userCode})`);
-            const notCleared = !cleared.includes(row[2]); // estimate
-
-            return agentMatch && notCleared;
+            return (
+                (row[0] || '').toUpperCase().includes(`(${userCode})`) &&
+                !cleared.includes(row[2])
+            );
         });
     }
 
@@ -81,8 +79,19 @@
             <div class="col-lg-1 invoiceBorderRight">${created}</div>
             <div class="col-lg-2 invoiceBorderRight">${phone}</div>
             <div class="col-lg-2 invoiceBorderRight">${store}</div>
+
+            <!-- 🔍 SEARCH COLUMN -->
+            <div class="col-lg-1 invoiceBorderRight">
+                <button class="searchBtn" data-phone="${phone}"
+                    style="background:#007bff;color:white;border:none;padding:4px 8px;border-radius:4px;">
+                    🔍
+                </button>
+            </div>
+
+            <!-- ✅ CLEAR COLUMN -->
             <div class="col-lg-1">
-                <button class="clearBtn" style="background:#28a745;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">
+                <button class="clearBtn"
+                    style="background:#28a745;color:white;border:none;padding:4px 8px;border-radius:4px;">
                     ✓
                 </button>
             </div>
@@ -90,20 +99,31 @@
         `;
     }
 
-    function attachClearHandlers() {
+    function attachHandlers() {
+        // SEARCH
+        document.querySelectorAll('.searchBtn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const phone = e.target.getAttribute('data-phone');
+
+                localStorage.setItem(INVOICE_KEY, JSON.stringify({
+                    phone,
+                    ts: Date.now()
+                }));
+
+                document.querySelector('a[href="/pos/main/invoicereprint"]')?.click();
+            });
+        });
+
+        // CLEAR
         document.querySelectorAll('.clearBtn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const rowEl = e.target.closest('.invoiceDetailRows');
                 const estimate = rowEl.getAttribute('data-estimate');
 
                 markCleared(estimate);
-
-                // remove from UI instantly
                 rowEl.remove();
 
-                // update badge
-                const remaining = document.querySelectorAll('.invoiceDetailRows').length;
-                updateBadge(remaining);
+                updateBadge(document.querySelectorAll('.invoiceDetailRows').length);
             });
         });
     }
@@ -116,43 +136,25 @@
         const rows = await fetchCSV();
         const filtered = filterRows(rows, userCode);
 
-        container.innerHTML = '';
-
-        if (filtered.length === 0) {
-            container.innerHTML = `<div style="padding:20px;">No results found</div>`;
-            return;
-        }
-
         container.innerHTML = filtered.map(buildRow).join('');
 
-        attachClearHandlers();
+        attachHandlers();
         updateBadge(filtered.length);
     }
 
-function updateHeaders() {
-    const headers = document.querySelectorAll('.invoiceResultHeaders');
+    function updateHeaders() {
+        const headers = document.querySelectorAll('.invoiceResultHeaders');
 
-    headers.forEach(header => {
-        const text = header.innerText.trim();
+        headers.forEach(header => {
+            const text = header.innerText.trim();
 
-        // Appt Time → Phone
-        if (text.startsWith('Appt')) {
-            header.innerHTML = 'Phone&nbsp;&nbsp;&nbsp;';
-        }
+            if (text.startsWith('Appt')) header.innerHTML = 'Phone';
+            if (text.includes('Prom')) header.innerHTML = 'Store';
+            if (text.startsWith('Vehicle')) header.innerHTML = 'Search 🔍';
+            if (text.startsWith('Team')) header.innerHTML = 'Clear';
+        });
+    }
 
-        // Prom Time → Store
-        if (text.includes('Prom')) {
-            header.innerHTML = 'Store&nbsp;&nbsp;&nbsp;';
-        }
-
-        // Vehicle → Clear
-        if (text.startsWith('Vehicle')) {
-            header.innerHTML = 'Clear&nbsp;&nbsp;&nbsp;';
-        }
-    });
-
-    console.log('✅ Headers updated (Phone / Store / Clear)');
-}
     function setActive(tab) {
         document.querySelectorAll('#ticketTypeSelector li')
             .forEach(el => el.classList.remove('active'));
@@ -174,7 +176,6 @@ function updateHeaders() {
         li.id = 'yourVoidsTab';
 
         li.innerHTML = `<a href="#">Your Voids <span>0</span></a>`;
-
         nav.appendChild(li);
 
         li.addEventListener('click', async () => {
@@ -184,7 +185,6 @@ function updateHeaders() {
         });
     }
 
-    const observer = new MutationObserver(addTab);
-    observer.observe(document.body, { childList: true, subtree: true });
+    new MutationObserver(addTab).observe(document.body, { childList: true, subtree: true });
 
 })();
