@@ -2,6 +2,8 @@
 // @name         Store Message Dialog
 // @match        https://edge.bigbrandtire.com/pos/invoice/*
 // @version      2.0
+// @updateURL    https://githubusercontent.com
+// @downloadURL  https://githubusercontent.com
 // @grant        GM_xmlhttpRequest
 // @connect      docs.google.com
 // @connect      googleusercontent.com
