@@ -208,14 +208,62 @@ navObserver.observe(document.body, {
 
         document.body.innerHTML = `
         <style>
-            body { margin:0; padding:8px; background:#0e0e0e; display:flex; }
-            .container { width:2000px; font-family:Segoe UI; font-size:13px; line-height:1.85; color:white; }
-            .row { display:flex; gap:40px; margin-bottom:6px; }
-            .label { width:55px; font-weight:600; color:#aaa; }
-            textarea { width:400px; height:80px; background:#1a1a1a; color:white; border:1px solid #333; padding:6px; }
-            button { margin-top:10px; margin-right:10px; background:#222; color:white; border:1px solid #444; padding:6px 10px; cursor:pointer; }
-            #hours { white-space:pre-line; }
-        </style>
+
+    body { margin:0; padding:8px; background:#0e0e0e; display:flex; }
+
+    .container {
+        width:2000px;
+        font-family:Segoe UI;
+        font-size:13px;
+        line-height:1.85;
+        color:white;
+
+        /* 🔥 fix dimness safely */
+        opacity:1 !important;
+        filter:none !important;
+    }
+
+    .row { display:flex; gap:40px; margin-bottom:6px; }
+
+    .label {
+        width:55px;
+        font-weight:600;
+        color:#white;
+
+        /* 🔥 ensure label not dimmed */
+        opacity:100 !important;
+    }
+
+    textarea {
+        width:400px;
+        height:80px;
+        background:#1a1a1a;
+        color:white;
+        border:1px solid #333;
+        padding:6px;
+
+        /* 🔥 fix dimness */
+        opacity:1 !important;
+        filter:none !important;
+    }
+
+    button {
+        margin-top:10px;
+        margin-right:10px;
+        background:#222;
+        color:white;
+        border:1px solid #444;
+        padding:6px 10px;
+        cursor:pointer;
+
+        /* 🔥 fix dimness */
+        opacity:1 !important;
+        filter:none !important;
+    }
+
+    #hours { white-space:pre-line; }
+
+</style>
 
         <div class="container">
             <div class="row"><span class="label">STORE</span><span id="store"></span></div>
